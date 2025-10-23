@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI总结测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        .ai-summary { background: linear-gradient(135deg, #e8f5e8, #f0f8ff); border: 2px solid #4CAF50; padding: 15px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>AI总结分析测试</h1>
+    <button onclick="testSearch()">测试搜索</button>
+    <div id="result"></div>
+
+    <script>
+        async function testSearch() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '正在搜索...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/assistant/api/v1/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: '利润情况分析',
+                        pageSize: 3
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('API响应:', result);
+                
+                if (result.success && result.data.length > 0) {
+                    const firstResult = result.data[0];
+                    console.log('第一个结果:', firstResult);
+                    console.log('analysisSummary存在:', !!firstResult.analysisSummary);
+                    
+                    let html = '';
+                    
+                    if (firstResult.analysisSummary) {
+                        html += `
+                            <div class="ai-summary">
+                                <h3>🤖 AI智能分析总结</h3>
+                                <pre>${firstResult.analysisSummary}</pre>
+                            </div>
+                        `;
+                    } else {
+                        html += '<div class="test-result">❌ 没有AI总结分析</div>';
+                    }
+                    
+                    html += '<div class="test-result">';
+                    html += '<h3>搜索结果:</h3>';
+                    result.data.forEach((item, index) => {
+                        html += `<div><strong>${index + 1}. ${item.fileName}</strong></div>`;
+                    });
+                    html += '</div>';
+                    
+                    resultDiv.innerHTML = html;
+                } else {
+                    resultDiv.innerHTML = '<div class="test-result">❌ 搜索失败或没有结果</div>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="test-result">❌ 错误: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

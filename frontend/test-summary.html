@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI总结测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .ai-summary {
+            background: linear-gradient(135deg, #e8f5e8, #f0f8ff);
+            border: 3px solid #4CAF50;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .ai-title {
+            color: #2e7d32;
+            font-size: 1.6rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .ai-content {
+            white-space: pre-line;
+            line-height: 1.8;
+            color: #333;
+            font-size: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #2980b9;
+        }
+        .result-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🤖 AI总结分析测试页面</h1>
+        
+        <div>
+            <button class="test-button" onclick="testSearch()">测试搜索：利润情况分析</button>
+            <button class="test-button" onclick="clearResults()">清空结果</button>
+        </div>
+        
+        <div id="result-info" class="result-info" style="display: none;">
+            <h3>API响应信息：</h3>
+            <div id="api-info"></div>
+        </div>
+        
+        <div id="ai-summary" class="ai-summary" style="display: none;">
+            <div class="ai-title">🤖 AI智能分析总结</div>
+            <div class="ai-content" id="ai-content"></div>
+        </div>
+        
+        <div id="file-list" style="display: none;">
+            <h3>文件列表：</h3>
+            <div id="file-items"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/assistant/api/v1';
+        
+        async function testSearch() {
+            const resultInfo = document.getElementById('result-info');
+            const aiSummary = document.getElementById('ai-summary');
+            const fileList = document.getElementById('file-list');
+            const apiInfo = document.getElementById('api-info');
+            const aiContent = document.getElementById('ai-content');
+            const fileItems = document.getElementById('file-items');
+            
+            // 显示加载状态
+            apiInfo.innerHTML = '正在搜索...';
+            resultInfo.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_BASE}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: '利润情况分析，总结到200字左右',
+                        useSemanticSearch: true,
+                        pageSize: 3
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // 显示API响应信息
+                apiInfo.innerHTML = `
+                    <p><strong>请求成功:</strong> ${result.success}</p>
+                    <p><strong>结果数量:</strong> ${result.data ? result.data.length : 0}</p>
+                    <p><strong>第一个结果字段:</strong> ${result.data && result.data[0] ? Object.keys(result.data[0]).join(', ') : '无'}</p>
+                    <p><strong>analysisSummary存在:</strong> ${result.data && result.data[0] && result.data[0].analysisSummary ? '是' : '否'}</p>
+                    <p><strong>analysisSummary长度:</strong> ${result.data && result.data[0] && result.data[0].analysisSummary ? result.data[0].analysisSummary.length : 0} 字符</p>
+                `;
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    const firstResult = result.data[0];
+                    
+                    // 显示AI总结
+                    if (firstResult.analysisSummary) {
+                        aiContent.textContent = firstResult.analysisSummary;
+                        aiSummary.style.display = 'block';
+                        console.log('✅ AI总结分析显示成功');
+                    } else {
+                        console.log('❌ 没有AI总结分析');
+                        aiSummary.style.display = 'none';
+                    }
+                    
+                    // 显示文件列表
+                    if (result.data.length > 0) {
+                        fileItems.innerHTML = result.data.map((item, index) => `
+                            <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid #e9ecef;">
+                                <h4>${index + 1}. ${item.fileName}</h4>
+                                <p><strong>路径:</strong> ${item.filePath}</p>
+                                <p><strong>类型:</strong> ${item.fileType}</p>
+                                <p><strong>大小:</strong> ${formatFileSize(item.fileSize)}</p>
+                                <p><strong>匹配度:</strong> ${Math.round(item.score * 100)}%</p>
+                                <p><strong>有AI总结:</strong> ${item.analysisSummary ? '是' : '否'}</p>
+                            </div>
+                        `).join('');
+                        fileList.style.display = 'block';
+                    }
+                } else {
+                    aiSummary.style.display = 'none';
+                    fileList.style.display = 'none';
+                }
+                
+            } catch (error) {
+                apiInfo.innerHTML = `<p style="color: red;"><strong>错误:</strong> ${error.message}</p>`;
+                aiSummary.style.display = 'none';
+                fileList.style.display = 'none';
+            }
+        }
+        
+        function clearResults() {
+            document.getElementById('result-info').style.display = 'none';
+            document.getElementById('ai-summary').style.display = 'none';
+            document.getElementById('file-list').style.display = 'none';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+    </script>
+</body>
+</html>

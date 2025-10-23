@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件AI助手</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+        }
+        
+        .results {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .result-item:hover {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .result-path {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-bottom: 8px;
+        }
+        
+        .result-content {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.4;
+        }
+        
+        .result-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+        
+        .folder-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .folder-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+        }
+        
+        .folder-path {
+            font-size: 14px;
+            color: #555;
+            flex: 1;
+        }
+        
+        .folder-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .status {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .status-value {
+            color: #3498db;
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: #efe;
+            color: #3c3;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 文件AI助手</h1>
+            <p>智能文件搜索与管理系统</p>
+        </div>
+        
+        <div class="status">
+            <h3 class="section-title">系统状态</h3>
+            <div id="status-content">
+                <div class="loading">正在加载系统状态...</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <h3 class="section-title">📁 文件夹管理</h3>
+                
+                <div class="form-group">
+                    <label for="folder-path">添加监控文件夹</label>
+                    <input type="text" id="folder-path" class="form-control" placeholder="输入文件夹路径，如: /Users/username/Documents">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="recursive" checked> 递归监控子文件夹
+                    </label>
+                </div>
+                
+                <button class="btn" onclick="addFolder()">添加文件夹</button>
+                <button class="btn btn-success" onclick="reindexAll()">重新索引</button>
+                
+                <div id="folder-list" class="folder-list">
+                    <div class="loading">正在加载文件夹列表...</div>
+                </div>
+            </div>
+            
+            <div class="search-section">
+                <h3 class="section-title">🔍 智能搜索</h3>
+                
+                <div class="search-box">
+                    <input type="text" id="search-input" class="form-control search-input" placeholder="输入搜索关键词...">
+                    <button class="btn" onclick="searchFiles()">搜索</button>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="semantic-search" checked> 启用语义搜索
+                    </label>
+                </div>
+                
+                <div id="search-results" class="results">
+                    <div class="loading">等待搜索...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/assistant/api/v1';
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSystemStatus();
+            loadFolders();
+        });
+        
+        // 加载系统状态
+        async function loadSystemStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/status`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const status = result.data;
+                    document.getElementById('status-content').innerHTML = `
+                        <div class="status-item">
+                            <span class="status-label">监控文件夹</span>
+                            <span class="status-value">${status.folders} 个</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">已索引文件</span>
+                            <span class="status-value">${status.files} 个</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-label">最后更新</span>
+                            <span class="status-value">${new Date(status.timestamp).toLocaleString()}</span>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('status-content').innerHTML = 
+                        '<div class="error">加载系统状态失败: ' + result.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('status-content').innerHTML = 
+                    '<div class="error">加载系统状态失败: ' + error.message + '</div>';
+            }
+        }
+        
+        // 加载文件夹列表
+        async function loadFolders() {
+            try {
+                const response = await fetch(`${API_BASE}/folders`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const folders = result.data;
+                    const folderList = document.getElementById('folder-list');
+                    
+                    if (folders.length === 0) {
+                        folderList.innerHTML = '<div class="loading">暂无监控文件夹</div>';
+                        return;
+                    }
+                    
+                    folderList.innerHTML = folders.map(folder => `
+                        <div class="folder-item">
+                            <div class="folder-path">${folder.path}</div>
+                            <div class="folder-actions">
+                                <button class="btn btn-sm btn-danger" onclick="removeFolder(${folder.id})">删除</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    document.getElementById('folder-list').innerHTML = 
+                        '<div class="error">加载文件夹列表失败: ' + result.message + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('folder-list').innerHTML = 
+                    '<div class="error">加载文件夹列表失败: ' + error.message + '</div>';
+            }
+        }
+        
+        // 添加文件夹
+        async function addFolder() {
+            const path = document.getElementById('folder-path').value.trim();
+            const recursive = document.getElementById('recursive').checked;
+            
+            if (!path) {
+                alert('请输入文件夹路径');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/folders?path=${encodeURIComponent(path)}&recursive=${recursive}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('文件夹添加成功', 'success');
+                    document.getElementById('folder-path').value = '';
+                    loadFolders();
+                    loadSystemStatus();
+                } else {
+                    showMessage('添加文件夹失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('添加文件夹失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 删除文件夹
+        async function removeFolder(id) {
+            if (!confirm('确定要删除这个监控文件夹吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/folders/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('文件夹删除成功', 'success');
+                    loadFolders();
+                    loadSystemStatus();
+                } else {
+                    showMessage('删除文件夹失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('删除文件夹失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 重新索引
+        async function reindexAll() {
+            if (!confirm('确定要重新索引所有文件夹吗？这可能需要一些时间。')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/folders/reindex`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('重新索引完成: ' + result.message, 'success');
+                    loadSystemStatus();
+                } else {
+                    showMessage('重新索引失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('重新索引失败: ' + error.message, 'error');
+            }
+        }
+        
+        // 搜索文件
+        async function searchFiles() {
+            const query = document.getElementById('search-input').value.trim();
+            const useSemantic = document.getElementById('semantic-search').checked;
+            
+            if (!query) {
+                alert('请输入搜索关键词');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('search-results');
+            resultsDiv.innerHTML = '<div class="loading">正在搜索...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        useSemanticSearch: useSemantic,
+                        pageSize: 20
+                    })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const results = result.data;
+                    if (results.length === 0) {
+                        resultsDiv.innerHTML = '<div class="loading">未找到匹配的文件</div>';
+                    } else {
+                        // 检查是否有AI总结分析
+                        const firstResult = results[0];
+                        console.log('第一个结果:', firstResult);
+                        console.log('analysisSummary存在:', !!firstResult.analysisSummary);
+                        console.log('analysisSummary内容:', firstResult.analysisSummary);
+                        let analysisHtml = '';
+                        if (firstResult.analysisSummary) {
+                            analysisHtml = `
+                                <div class="result-item" style="background: linear-gradient(135deg, #e8f5e8, #f0f8ff); border: 3px solid #4CAF50; margin-bottom: 20px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                    <div class="result-title" style="color: #2e7d32; font-size: 1.6rem; margin-bottom: 20px; font-weight: bold; text-align: center; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">
+                                        🤖 AI智能分析总结
+                                    </div>
+                                    <div class="result-content" style="white-space: pre-line; line-height: 1.8; color: #333; font-size: 15px; max-height: 500px; overflow-y: auto; background: rgba(255,255,255,0.8); padding: 15px; border-radius: 8px;">
+                                        ${firstResult.analysisSummary}
+                                    </div>
+                                </div>
+                            `;
+                            console.log('✅ AI总结分析已添加到页面');
+                        } else {
+                            console.log('❌ 没有找到analysisSummary字段');
+                        }
+                        
+                        // 只显示AI总结分析，不显示文件列表
+                        if (firstResult.analysisSummary) {
+                            resultsDiv.innerHTML = analysisHtml;
+                        } else {
+                            // 如果没有AI总结，显示简单的文件列表
+                            resultsDiv.innerHTML = results.map(item => `
+                                <div class="result-item">
+                                    <div class="result-title">${item.fileName}</div>
+                                    <div class="result-path">${item.filePath}</div>
+                                    <div class="result-content">${item.highlight || item.summary || '无内容预览'}</div>
+                                    <div class="result-meta">
+                                        <span>类型: ${item.fileType}</span>
+                                        <span>大小: ${formatFileSize(item.fileSize)}</span>
+                                        <span>匹配度: ${Math.round(item.score * 100)}%</span>
+                                    </div>
+                                </div>
+                            `).join('');
+                        }
+                    }
+                } else {
+                    resultsDiv.innerHTML = '<div class="error">搜索失败: ' + result.message + '</div>';
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="error">搜索失败: ' + error.message + '</div>';
+            }
+        }
+        
+        // 格式化文件大小
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+        }
+        
+        // 显示消息
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messageDiv.style.position = 'fixed';
+            messageDiv.style.top = '20px';
+            messageDiv.style.right = '20px';
+            messageDiv.style.zIndex = '1000';
+            messageDiv.style.padding = '15px 20px';
+            messageDiv.style.borderRadius = '8px';
+            messageDiv.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
+        }
+        
+        // 回车搜索
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchFiles();
+            }
+        });
+    </script>
+</body>
+</html>

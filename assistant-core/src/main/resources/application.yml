@@ -1,0 +1,76 @@
+# 文件AI助手配置文件
+spring:
+  application:
+    name: file-ai-assistant
+  
+  # 数据源配置
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:${user.home}/.file-assistant/data/assistant.db
+    username: 
+    password: 
+  
+  # JPA配置
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLiteDialect
+        format_sql: true
+
+# MyBatis Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    type-handlers-package: com.assistant.core.handler
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 助手应用配置
+assistant:
+  # 存储配置
+  storage:
+    data-dir: ${user.home}/.file-assistant/data
+    index-dir: ${user.home}/.file-assistant/index
+    max-index-size: 2GB
+  
+  # AI模型配置
+  ai:
+    embedding-model: ${user.home}/.file-assistant/models/all-MiniLM-L6-v2.onnx
+    embedding-dimension: 384
+    max-concurrent-inference: 2
+  
+  # 索引配置
+  index:
+    batch-size: 100
+    max-file-size: 50MB
+    exclude-patterns:
+      - "*.tmp"
+      - "*.log"
+      - "~$*"
+      - "*.cache"
+  
+  # 性能配置
+  performance:
+    memory-limit: 512MB
+    cpu-limit: 50%
+
+# 日志配置
+logging:
+  level:
+    com.assistant: DEBUG
+    org.springframework.web: INFO
+    org.apache.tika: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${user.home}/.file-assistant/logs/assistant.log
+    max-size: 10MB
+    max-history: 30
