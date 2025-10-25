@@ -48,6 +48,22 @@ public class BaseResponse<T> {
         return response;
     }
     
+    public static <T> BaseResponse<T> fail(T data) {
+        return new BaseResponse<>(false, "操作失败", data);
+    }
+    
+    public static <T> BaseResponse<T> fail(String errorCode, String errorMessage) {
+        BaseResponse<T> response = new BaseResponse<>(false, errorMessage);
+        response.setCode(Integer.parseInt(errorCode));
+        return response;
+    }
+    
+    public static <T> BaseResponse<T> fail(String errorCode, String errorMessage, T data) {
+        BaseResponse<T> response = new BaseResponse<>(false, errorMessage, data);
+        response.setCode(Integer.parseInt(errorCode));
+        return response;
+    }
+    
     // Getters and Setters
     public boolean isSuccess() {
         return success;

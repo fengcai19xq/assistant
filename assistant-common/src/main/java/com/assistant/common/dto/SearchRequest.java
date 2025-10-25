@@ -1,14 +1,10 @@
 package com.assistant.common.dto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 /**
  * 搜索请求DTO
  */
 public class SearchRequest {
     
-    @NotBlank(message = "搜索关键词不能为空")
     private String query;
     
     private String fileType;

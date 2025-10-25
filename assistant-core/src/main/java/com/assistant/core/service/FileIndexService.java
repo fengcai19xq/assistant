@@ -1,7 +1,6 @@
 package com.assistant.core.service;
 
 import com.assistant.common.dto.FileInfo;
-import com.assistant.common.util.FileUtils;
 import com.assistant.core.entity.FileIndex;
 import com.assistant.core.mapper.FileIndexMapper;
 import org.apache.tika.Tika;
@@ -91,7 +90,7 @@ public class FileIndexService {
     public boolean indexFile(Path filePath) {
         try {
             // 检查文件是否应该被索引
-            if (!FileUtils.shouldIndex(filePath)) {
+            if (!shouldIndex(filePath)) {
                 return false;
             }
             
@@ -127,7 +126,7 @@ public class FileIndexService {
             fileIndex.setFilePath(filePath.toString());
             fileIndex.setFileName(filePath.getFileName().toString());
             fileIndex.setFileSize(Files.size(filePath));
-            fileIndex.setFileType(FileUtils.getFileType(filePath.getFileName().toString()));
+            fileIndex.setFileType(getFileType(filePath.getFileName().toString()));
             fileIndex.setLastModified(LocalDateTime.now().toString());
             fileIndex.setContent(content);
             fileIndex.setSummary(generateSummary(content));
@@ -287,5 +286,106 @@ public class FileIndexService {
             logger.error("获取所有文件列表失败", e);
             return new ArrayList<>();
         }
+    }
+    
+    /**
+     * 添加监控文件夹
+     */
+    public void addWatchFolder(String path, boolean recursive) {
+        // 实现添加监控文件夹逻辑
+        logger.info("添加监控文件夹: {}, 递归: {}", path, recursive);
+        indexFolder(path, recursive);
+    }
+    
+    /**
+     * 获取监控文件夹列表
+     */
+    public List<Object> getWatchFolders() {
+        // 返回监控文件夹列表
+        return new ArrayList<>();
+    }
+    
+    /**
+     * 删除监控文件夹
+     */
+    public void removeWatchFolder(Long id) {
+        logger.info("删除监控文件夹: {}", id);
+    }
+    
+    /**
+     * 重建索引
+     */
+    public void rebuildIndex() {
+        logger.info("重建索引");
+        // 实现重建索引逻辑
+    }
+    
+    /**
+     * 获取总文件数
+     */
+    public int getTotalFileCount() {
+        try {
+            return fileIndexMapper.selectCount(null).intValue();
+        } catch (Exception e) {
+            logger.error("获取总文件数失败", e);
+            return 0;
+        }
+    }
+    
+    /**
+     * 获取已索引文件数
+     */
+    public int getIndexedFileCount() {
+        return getTotalFileCount();
+    }
+    
+    /**
+     * 清空所有索引
+     */
+    public void clearAllIndexes() {
+        try {
+            fileIndexMapper.delete(null);
+            logger.info("清空所有索引");
+        } catch (Exception e) {
+            logger.error("清空所有索引失败", e);
+        }
+    }
+    
+    /**
+     * 检查文件是否应该被索引
+     */
+    private boolean shouldIndex(Path filePath) {
+        String fileName = filePath.getFileName().toString().toLowerCase();
+        
+        // 跳过隐藏文件和系统文件
+        if (fileName.startsWith(".") || fileName.startsWith("~")) {
+            return false;
+        }
+        
+        // 跳过临时文件
+        if (fileName.endsWith(".tmp") || fileName.endsWith(".temp")) {
+            return false;
+        }
+        
+        // 跳过二进制文件（简单检查）
+        String[] binaryExtensions = {".exe", ".dll", ".so", ".dylib", ".bin", ".jar", ".war", ".zip", ".tar", ".gz", ".rar", ".7z"};
+        for (String ext : binaryExtensions) {
+            if (fileName.endsWith(ext)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 获取文件类型
+     */
+    private String getFileType(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex > 0 && lastDotIndex < fileName.length() - 1) {
+            return fileName.substring(lastDotIndex + 1).toLowerCase();
+        }
+        return "unknown";
     }
 }

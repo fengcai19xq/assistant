@@ -23,11 +23,25 @@
             <artifactId>assistant-core</artifactId>
             <version>1.0.0</version>
         </dependency>
+        
+        <!-- 依赖AI模块 -->
+        <dependency>
+            <groupId>com.assistant</groupId>
+            <artifactId>assistant-ai</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        
+        <!-- 依赖存储模块 -->
+        <dependency>
+            <groupId>com.assistant</groupId>
+            <artifactId>assistant-storage</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
-        <!-- Spring Boot Web -->
+        <!-- Spring Boot WebFlux -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
         <!-- Spring Boot WebSocket -->

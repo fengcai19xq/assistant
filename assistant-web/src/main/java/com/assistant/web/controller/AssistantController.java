@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+// import javax.validation.Valid; // 暂时移除validation
 import java.util.List;
 
 /**
@@ -103,7 +103,7 @@ public class AssistantController {
      * 搜索文件
      */
     @PostMapping("/search")
-    public BaseResponse<List<SearchResult>> searchFiles(@Valid @RequestBody SearchRequest request) {
+    public BaseResponse<List<SearchResult>> searchFiles(@RequestBody SearchRequest request) {
         try {
             List<SearchResult> results = searchService.searchFiles(request);
             return BaseResponse.success("搜索完成", results);

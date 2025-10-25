@@ -120,4 +120,13 @@ public class SearchResult {
     public void setAnalysisSummary(String analysisSummary) {
         this.analysisSummary = analysisSummary;
     }
+    
+    // 兼容性方法
+    public Double getRelevanceScore() {
+        return score;
+    }
+    
+    public void setRelevanceScore(Double relevanceScore) {
+        this.score = relevanceScore;
+    }
 }

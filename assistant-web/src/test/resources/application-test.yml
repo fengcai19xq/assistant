@@ -1,0 +1,75 @@
+# 测试环境配置
+spring:
+  profiles:
+    active: test
+  datasource:
+    url: jdbc:sqlite:file:test.db
+    driver-class-name: org.sqlite.JDBC
+    username: 
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+  web:
+    mvc:
+      servlet:
+        context-path: /assistant
+
+# 应用配置
+assistant:
+  storage:
+    data-dir: ${user.home}/.file-assistant-test/data
+    index-dir: ${user.home}/.file-assistant-test/index
+    model-dir: ${user.home}/.file-assistant-test/models
+    log-dir: ${user.home}/.file-assistant-test/logs
+  ai:
+    model:
+      name: all-MiniLM-L6-v2
+      path: ${assistant.storage.model-dir}/all-MiniLM-L6-v2.onnx
+      use-onnx: false  # 测试环境使用模拟模式
+  search:
+    default-page-size: 10
+    max-page-size: 100
+    cache:
+      enabled: true
+      size: 1000
+      ttl: 3600
+  monitoring:
+    enabled: true
+    metrics:
+      enabled: true
+    alert:
+      enabled: false  # 测试环境关闭告警
+      memory-threshold: 90.0
+      disk-threshold: 95.0
+      error-threshold: 50
+      response-time-threshold: 10000
+      gc-time-threshold: 5000
+
+# 日志配置
+logging:
+  level:
+    com.assistant: DEBUG
+    org.springframework: WARN
+    org.apache.ibatis: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: ${assistant.storage.log-dir}/assistant-test.log
+
+# 测试配置
+test:
+  data:
+    cleanup: true
+    sample-size: 100
+  performance:
+    timeout: 5000
+    max-memory: 512MB
+  mock:
+    enabled: true
+    services:
+      - embedding
+      - vector-storage
+      - ai-model

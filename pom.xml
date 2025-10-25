@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.assistant</groupId>
-    <artifactId>file-ai-assistant</artifactId>
+    <artifactId>assistant-parent</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>File AI Assistant MVP</name>
@@ -15,22 +15,32 @@
     <modules>
         <module>assistant-common</module>
         <module>assistant-core</module>
+        <module>assistant-ai</module>
+        <module>assistant-storage</module>
         <module>assistant-web</module>
     </modules>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
-        <!-- 版本管理 -->
+        <!-- 版本管理 - 升级到方案要求 -->
         <spring-boot.version>2.7.18</spring-boot.version>
         <mybatis-plus.version>3.5.4</mybatis-plus.version>
         <onnxruntime.version>1.16.0</onnxruntime.version>
-        <tika.version>2.8.0</tika.version>
+        <tika.version>2.9.1</tika.version>
         <poi.version>5.2.4</poi.version>
-        <pdfbox.version>2.0.29</pdfbox.version>
+        <pdfbox.version>3.0.1</pdfbox.version>
         <commons-io.version>2.16.0</commons-io.version>
+        <lucene.version>9.8.0</lucene.version>
+        <rocksdb.version>8.8.1</rocksdb.version>
+        <hnswlib.version>0.7.0</hnswlib.version>
+        <opencv.version>4.8.0</opencv.version>
+        <rxjava.version>3.1.8</rxjava.version>
+        <micrometer.version>1.12.0</micrometer.version>
+        <logback.version>1.4.14</logback.version>
+        <jna.version>5.14.0</jna.version>
     </properties>
 
     <dependencyManagement>
@@ -111,8 +121,76 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <source>8</source>
-                        <target>8</target>
+                        <source>11</source>
+                        <target>11</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*Test.java</include>
+                            <include>**/*Tests.java</include>
+                        </includes>
+                        <excludes>
+                            <exclude>**/*IntegrationTest.java</exclude>
+                            <exclude>**/*PerformanceTest.java</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <configuration>
+                        <includes>
+                            <include>**/*IntegrationTest.java</include>
+                            <include>**/*PerformanceTest.java</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.8</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>com.github.spotbugs</groupId>
+                    <artifactId>spotbugs-maven-plugin</artifactId>
+                    <version>4.7.3.0</version>
+                    <configuration>
+                        <effort>Max</effort>
+                        <threshold>Low</threshold>
+                        <failOnError>true</failOnError>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.40.0</version>
+                    <configuration>
+                        <java>
+                            <googleJavaFormat>
+                                <version>1.17.0</version>
+                                <style>GOOGLE</style>
+                            </googleJavaFormat>
+                        </java>
                     </configuration>
                 </plugin>
             </plugins>

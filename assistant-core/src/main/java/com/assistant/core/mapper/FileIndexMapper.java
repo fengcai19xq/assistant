@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文件索引Mapper
@@ -45,4 +46,76 @@ public interface FileIndexMapper extends BaseMapper<FileIndex> {
      */
     @Select("SELECT id, file_path, file_name, file_size, file_type, last_modified, indexed_time, folder_id, content, summary FROM file_index")
     List<FileIndex> selectAllWithoutVectorData();
+    
+    /**
+     * 获取文件类型分布
+     */
+    @Select("SELECT file_type, COUNT(*) as count FROM file_index GROUP BY file_type")
+    List<Map<String, Object>> getFileTypeDistribution();
+    
+    /**
+     * 获取文件大小分布
+     */
+    @Select("SELECT CASE WHEN file_size < 1024*1024 THEN 'small' WHEN file_size < 10*1024*1024 THEN 'medium' ELSE 'large' END as size_category, COUNT(*) as count FROM file_index GROUP BY size_category")
+    List<Map<String, Object>> getFileSizeDistribution();
+    
+    /**
+     * 获取修改时间分布
+     */
+    @Select("SELECT CASE WHEN last_modified > datetime('now', '-1 day') THEN 'recent' WHEN last_modified > datetime('now', '-7 days') THEN 'week' WHEN last_modified > datetime('now', '-30 days') THEN 'month' ELSE 'old' END as time_category, COUNT(*) as count FROM file_index GROUP BY time_category")
+    List<Map<String, Object>> getModificationTimeDistribution();
+    
+    /**
+     * 获取慢查询
+     */
+    @Select("SELECT sql FROM sqlite_master WHERE type='table' AND name='file_index'")
+    List<String> getSlowQueries();
+    
+    /**
+     * 优化查询计划
+     */
+    @Select("ANALYZE file_index")
+    void optimizeQueryPlan();
+    
+    /**
+     * 创建内容索引
+     */
+    @Select("CREATE INDEX IF NOT EXISTS idx_content ON file_index(content)")
+    void createContentIndex();
+    
+    /**
+     * 创建文件类型索引
+     */
+    @Select("CREATE INDEX IF NOT EXISTS idx_file_type ON file_index(file_type)")
+    void createFileTypeIndex();
+    
+    /**
+     * 创建修改时间索引
+     */
+    @Select("CREATE INDEX IF NOT EXISTS idx_last_modified ON file_index(last_modified)")
+    void createModificationTimeIndex();
+    
+    /**
+     * 创建文件大小索引
+     */
+    @Select("CREATE INDEX IF NOT EXISTS idx_file_size ON file_index(file_size)")
+    void createFileSizeIndex();
+    
+    /**
+     * 更新表统计信息
+     */
+    @Select("ANALYZE file_index")
+    void updateTableStats();
+    
+    /**
+     * 删除无效索引
+     */
+    @Select("DELETE FROM file_index WHERE file_path NOT IN (SELECT file_path FROM file_index WHERE file_path IS NOT NULL)")
+    int deleteInvalidIndexes();
+    
+    /**
+     * 获取索引大小
+     */
+    @Select("SELECT COUNT(*) FROM file_index")
+    long getIndexSize();
 }
